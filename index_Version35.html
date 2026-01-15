@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Home | Bend Cut Send</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#016e6f">
+  <link rel="icon" href="images/favicon.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Hero layout with one image + text */
+    .hero-top {
+      background:#020617;
+      color:#f9fafb;
+      display:grid;
+      grid-template-columns:minmax(0,1.1fr) minmax(0,1.2fr);
+      gap:2rem;
+      align-items:stretch;
+      padding:2.5rem 8vw;
+    }
+    .hero-top-image {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .hero-top-image img {
+      display:block;
+      width:100%;
+      height:auto;
+      max-height:420px;
+      object-fit:cover;
+      border-radius:0.75rem;
+    }
+    .hero-top-text {
+      font-family:"Montserrat",system-ui,sans-serif;
+      text-transform:uppercase;
+      letter-spacing:.16em;
+    }
+    .hero-top-text h1 {
+      margin:0 0 .75rem;
+      font-size:2.4rem;
+      line-height:1.25;
+    }
+    .hero-sub {
+      margin:.75rem 0 1.75rem;
+      font-size:.95rem;
+      letter-spacing:.18em;
+    }
+    .hero-right-block {
+      margin-top:1.25rem;
+      font-size:1.4rem;
+      line-height:1.4;
+    }
+    .hero-right-sub {
+      margin-top:1rem;
+      font-size:.95rem;
+      letter-spacing:.18em;
+    }
+
+    @media (max-width: 900px) {
+      .hero-top {
+        grid-template-columns:1fr;
+        padding:1.75rem 1.1rem 2rem;
+      }
+      .hero-top-text h1 {
+        font-size:2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="active">Home</a>
+  <a href="how-it-works.html">How it works</a>
+  <a href="metals.html">Metals Available</a>
+  <a href="qa.html">Q&amp;A</a>
+  <a href="request-quote.html">Request a Quote</a>
+  <a href="ask-question.html">Contact Us/Ask a Question</a>
+</nav>
+
+<!-- HERO with image and the wording you want as real text -->
+<section class="hero-top">
+  <div class="hero-top-image">
+    <!-- uses laser-1.jpg from httpdocs -->
+    <img src="laser-1.jpg"
+         alt="Laser cutting metal sheet in a workshop">
+  </div>
+
+  <div class="hero-top-text">
+    <h1>Bend. Cut. Send.</h1>
+    <div class="hero-sub">
+      CNC BENDING, LASER CUTTING &amp;<br>
+      FAST DELIVERY
+    </div>
+
+    <div class="hero-right-block">
+      PRECISION<br>
+      METAL<br>
+      PARTS
+    </div>
+    <div class="hero-right-sub">
+      FROM DRAWING TO DELIVERY,<br>
+      MADE EASY
+    </div>
+  </div>
+</section>
+
+<main class="container">
+  <section>
+    <h2>Welcome to Bend Cut Send</h2>
+    <p>
+      We laser cut and bend your custom metal parts based on your design.
+      Upload your drawing, approve the final design, pay securely
+      (Debit/Credit Card or Ozow Instant EFT), and we manufacture and ship.
+    </p>
+  </section>
+
+  <section class="steps-section">
+    <div class="steps-grid">
+      <article class="step-card">
+        <h3>1. Upload Design</h3>
+        <p>Provide an AutoCAD file (dwg/dxf/etc.) or even a sketch with measurements.</p>
+      </article>
+      <article class="step-card">
+        <h3>2. Approve Quote</h3>
+        <p>We refine the design if needed and send you a quote with delivery estimate.</p>
+      </article>
+      <article class="step-card">
+        <h3>3. Secure Payment</h3>
+        <p>Pay via Debit/Credit Card or Ozow Instant EFT on our secure payment portal.</p>
+      </article>
+      <article class="step-card">
+        <h3>4. Manufacture</h3>
+        <p>Your part is laser cut, bent and prepared to spec. We keep you informed.</p>
+      </article>
+      <article class="step-card">
+        <h3>5. Shipping &amp; Support</h3>
+        <p>Track delivery and get ongoing support. If we made a mistake, we make it right.</p>
+      </article>
+    </div>
+
+    <div class="steps-cta" style="margin-top:2.5rem;">
+      <div>
+        <h2>Ready to begin?</h2>
+        <p>Request a quote now with your design and material requirements.</p>
+      </div>
+      <a href="request-quote.html" class="cta-btn accent">Request a Quote</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Bend Cut Send. All rights reserved.</p>
+</footer>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
