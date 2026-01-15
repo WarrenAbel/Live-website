@@ -1,0 +1,28 @@
+# ----------------------------------------------------------------------
+# Bend Cut Send - .htaccess
+# Purpose:
+# - Disable directory listing
+# - Add basic security headers
+# - HTTPS redirect is handled by Plesk (Redirect from http to https)
+# ----------------------------------------------------------------------
+
+# 1. Disable directory listing
+Options -Indexes
+
+# 2. Basic security headers
+<IfModule mod_headers.c>
+  # Prevent MIME-type sniffing
+  Header set X-Content-Type-Options "nosniff"
+
+  # Clickjacking protection (allow only same site to frame)
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # Basic XSS protection hint (legacy but harmless)
+  Header set X-XSS-Protection "1; mode=block"
+
+  # Referrer policy (do not leak full URLs to other sites)
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Content Security Policy (relaxed; adjust if you add external resources)
+  Header set Content-Security-Policy "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' https:; connect-src 'self' https:; font-src 'self' https:; frame-ancestors 'self';"
+</IfModule>
