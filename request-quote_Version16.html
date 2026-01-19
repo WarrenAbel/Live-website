@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Request a Quote | Bend Cut Send</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html">Home</a>
+  <a href="how-it-works.html">How it works</a>
+  <a href="metals.html">Metals Available</a>
+  <a href="qa.html">Q&amp;A</a>
+  <a href="request-quote.html" class="active">Request a Quote</a>
+  <a href="ask-question.html">Contact Us/Ask a Question</a>
+</nav>
+
+<main class="container text-page">
+  <h1>Request a Quote</h1>
+
+  <div class="form-card">
+    <form action="request-quote.php" method="post" enctype="multipart/form-data" id="quote-form">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+
+      <label>
+        Email
+        <input type="email" name="email" required>
+      </label>
+
+      <label>
+        Mobile number
+        <input
+          type="tel"
+          name="mobile"
+          required
+          pattern="^(\+27|0)[0-9]{9}$"
+          inputmode="numeric"
+          placeholder="+27XXXXXXXXX or 0XXXXXXXXX">
+      </label>
+
+      <label>
+        Project description
+        <textarea name="description" required></textarea>
+      </label>
+
+      <label>
+        Upload drawings (max 5 files)
+        <input type="file" name="files[]" multiple>
+      </label>
+
+      <button type="submit" class="cta-btn accent">Submit</button>
+    </form>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Bend Cut Send.</p>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Enforce max 5 files on the client side without changing anything else
+  (function () {
+    var fileInput = document.querySelector('input[type="file"][name="files[]"]');
+    if (!fileInput) return;
+
+    fileInput.addEventListener('change', function (e) {
+      if (this.files.length > 5) {
+        alert('You can upload a maximum of 5 files.');
+        this.value = '';
+      }
+    });
+  })();
+</script>
+</body>
+</html>
