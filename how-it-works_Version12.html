@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>How It Works | Bend Cut Send</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Bend Cut Send</a>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.body.classList.toggle('nav-open');">
+      ☰
+    </button>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="how-it-works.html" class="active">How it works</a>
+      <a href="metals.html">Metals Available</a>
+      <a href="qa.html">Q&amp;A</a>
+      <a href="request-quote.html">Request a Quote</a>
+      <a href="ask-question.html">Contact Us/Ask a Question</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container text-page">
+  <h1>How It Works</h1>
+
+  <p>
+    Bend Cut Send provides laser-cut metal parts based on your own designs. Our process
+    is intentionally simple – you send us a drawing, choose the material and finish,
+    and we deliver accurately cut parts.
+  </p>
+
+  <h2>1. Prepare your design</h2>
+  <p>
+    Start by preparing a 2D or 3D design of the parts you want to have cut. We accept
+    a range of common formats typically exported from CAD software, including DWG,
+    DXF, DWT, DWS, DWF, DWFx, DXB, PDF, STL and common image formats (JPEG, PNG, TIFF, BMP).
+    Please ensure that:
+  </p>
+  <ul>
+    <li>Dimensions are clearly indicated and drawn at 1:1 scale where possible.</li>
+    <li>All parts to be cut are visible on the drawing and not hidden by layers.</li>
+    <li>Holes and cutouts are sized appropriately for the material thickness.</li>
+  </ul>
+
+  <h2>2. Choose material, finish and thickness</h2>
+  <p>
+    On the <a href="request-quote.html">Request a Quote</a> page, you will select a material,
+    surface finish and thickness combination. These options are limited to combinations
+    we can cut reliably. The dropdowns on the form guide you through valid choices.
+  </p>
+  <p>
+    If you are unsure which material or thickness is best for your application, you can
+    use the <a href="ask-question.html">Contact Us/Ask a Question</a> page to ask for advice
+    before submitting a quote request.
+  </p>
+
+  <h2>3. Submit a quote request</h2>
+  <p>
+    Once your design file is ready and you know the material requirements, complete the
+    quote form with your contact details and address. Upload your design file and specify
+    the quantity required. You can also add comments if there is anything special we
+    should know about your project.
+  </p>
+  <p>
+    After you submit the form, you will receive an automatic confirmation email summarising
+    your request. At the same time, we receive your details and design so that we can
+    prepare a quotation.
+  </p>
+
+  <h2>4. Receive your quotation</h2>
+  <p>
+    We will review your design, check the selected material and thickness, and calculate
+    cutting time and material usage. If anything is unclear or needs adjustment, we may
+    contact you by email to confirm details before finalising the quote.
+  </p>
+  <p>
+    Once ready, we send you a quotation by email. The quotation will include pricing,
+    lead time estimates and any notes or recommendations.
+  </p>
+
+  <h2>5. Production and delivery</h2>
+  <p>
+    When you accept the quotation and confirm that you would like to proceed, we schedule
+    your job for cutting. Your parts are then laser cut according to your design and
+    the agreed material specification.
+  </p>
+  <p>
+    After cutting, your order is packed for delivery. Depending on your location and our
+    arrangement with you, we either ship the parts to your address or make them available
+    for collection.
+  </p>
+
+  <h2>Need help?</h2>
+  <p>
+    If any part of this process is unclear, or you are not sure if your design or file
+    format is suitable, please send us a message via the
+    <a href="ask-question.html">Contact Us/Ask a Question</a> page. We are happy to help.
+  </p>
+</main>
+
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Bend Cut Send.</p>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

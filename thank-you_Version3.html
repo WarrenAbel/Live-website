@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Thank You | Bend Cut Send</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Bend Cut Send</a>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.body.classList.toggle('nav-open');">
+      ☰
+    </button>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="metals.html">Metals Available</a>
+      <a href="qa.html">Q&amp;A</a>
+      <a href="request-quote.html" class="active">Request a Quote</a>
+      <a href="ask-question.html">Ask a Question</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container">
+  <h1>Thank You</h1>
+  <p>Your quote request has been submitted successfully. We will contact you by email as soon as possible.</p>
+  <p><a href="index.html">Return to Home</a></p>
+</main>
+
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Bend Cut Send.</p>
+</footer>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
