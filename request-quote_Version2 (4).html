@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Request a Quote | Bend Cut Send</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    .msg-success { color: #138a36; display: inline-block; margin-top: .25rem; }
+    .msg-error { color: #c62828; display: inline-block; margin-top: .25rem; }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    @media (max-width: 768px) {
+      .grid-3,
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html">Home</a>
+  <a href="how-it-works.html">How it works</a>
+  <a href="metals.html">Metals Available</a>
+  <a href="qa.html">Q&amp;A</a>
+  <a href="request-quote.html" class="active">Request a Quote</a>
+  <a href="ask-question.html">Contact Us/Ask a Question</a>
+</nav>
+
+<main class="container">
+  <h1>Request a Quote</h1>
+  <p>Please complete the form below and we will email you a quote.</p>
+
+  <form class="form-card" action="request-quote-handler.php" method="post" enctype="multipart/form-data">
+    <div class="grid-2">
+      <label>First Name
+        <input type="text" name="first_name" required>
+      </label>
+      <label>Last Name
+        <input type="text" name="last_name" required>
+      </label>
+    </div>
+    <label>Email
+      <input type="email" name="email" required>
+    </label>
+    <label>Mobile Number
+      <input type="text" name="phone" required>
+    </label>
+
+    <div class="grid-2">
+      <label>Street Address
+        <input type="text" name="street" placeholder="Street number and name" required>
+      </label>
+      <label>City
+        <input type="text" name="city" required>
+      </label>
+    </div>
+    <div class="grid-2">
+      <label>Building Type
+        <select name="building_type" required>
+          <option value="">-- Select --</option>
+          <option>House</option>
+          <option>Apartment</option>
+          <option>Office</option>
+          <option>Industrial</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label>Postal Code
+        <input type="text" name="postal_code" inputmode="numeric" pattern="\d{4}" title="4-digit postal code" placeholder="e.g., 2191" required>
+      </label>
+    </div>
+
+    <div class="grid-3">
+      <label>Material
+        <select id="material" name="material" required>
+          <option value="">-- Select material --</option>
+          <option value="mild_steel">Mild Steel</option>
+          <option value="3cr12">3CR12 Stainless Steel</option>
+          <option value="430_ss">430 Stainless Steel</option>
+          <option value="304_ss">304 Stainless Steel</option>
+          <option value="316_ss">316 Stainless Steel</option>
+          <option value="aluminium_1050">Aluminium 1050</option>
+        </select>
+      </label>
+
+      <label>Surface Finish
+        <select id="surface_finish" name="surface_finish" required disabled>
+          <option value="">-- Select finish --</option>
+        </select>
+      </label>
+
+      <label>Thickness
+        <select id="thickness" name="thickness" required disabled>
+          <option value="">-- Select thickness --</option>
+        </select>
+      </label>
+    </div>
+
+    <label>Quantity
+      <input
+        type="number"
+        name="quantity"
+        id="quantity"
+        min="1"
+        step="1"
+        value="1"
+        required
+        inputmode="numeric">
+    </label>
+
+    <label>Comments
+      <textarea name="comments" rows="5"></textarea>
+    </label>
+
+    <label>Design File
+      <input id="design_file" type="file" name="design_file[]" multiple required
+             accept=".dwg,.dwt,.dxf,.dws,.dwf,.dwfx,.dxb,.pdf,.stl,.jpeg,.jpg,.png,.tiff,.bmp"
+             aria-describedby="design_file_help design_file_status">
+      <small id="design_file_help">Please upload design files (dwg, dwt, dxf, dws, dwf, dwfx, dxb, pdf, stl, jpeg, jpg, png, tiff, bmp). Maximum size 25MB per file.</small>
+      <small id="design_file_status" role="status" aria-live="polite"></small>
+    </label>
+
+    <button type="submit" class="cta-btn accent">Submit Request</button>
+  </form>
+</main>
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Bend Cut Send.</p>
+</footer>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* Validation Script... Same As Original Code */
+</script>
+</body>
+</html>
