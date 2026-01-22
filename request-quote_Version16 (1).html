@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Request a Quote | Bend Cut Send</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f9fafc;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #1D4ED8;
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    p {
+      text-align: center;
+      color: #6B7280;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-row, .form-row-half {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-row-half label,
+    .form-row label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.875rem;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      color: #374151;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+
+    .phone-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .phone-code {
+      padding: 0 1rem;
+      text-align: center;
+      border: 1px solid #d1d5db;
+      background-color: #f9fafb;
+      border-radius: 0.5rem;
+      height: 2.6rem;
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+    }
+
+    .phone-row .phone-input {
+      flex: 1;
+    }
+
+    button {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      margin: 1rem auto;
+    }
+
+    button:hover {
+      background-color: #059669;
+    }
+
+    .form-row-note {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .centered {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+<main class="container">
+  <h1>Request a Quote</h1>
+  <p>Please complete the form below and we will send you your quote details.</p>
+
+  <form class="form-card" action="request-quote-handler.php" method="post" enctype="multipart/form-data">
+    <!-- First and Last Name Fields -->
+    <div class="form-row">
+      <label>First Name
+        <input type="text" name="first_name" placeholder="Enter your first name" required>
+      </label>
+      <label>Last Name
+        <input type="text" name="last_name" placeholder="Enter your last name" required>
+      </label>
+    </div>
+    
+    <!-- Email Address and Mobile Number -->
+    <div class="form-row">
+      <label>Email Address
+        <input type="email" name="email" placeholder="Enter your email address" required>
+      </label>
+      <label>Mobile Number
+        <div class="phone-row">
+          <div class="phone-code">+27</div>
+          <input class="phone-input" type="tel" name="phone" pattern="^[0-9]{9}$" inputmode="numeric" placeholder="Enter 9-digit number (e.g., 123456789)" required>
+        </div>
+      </label>
+    </div>
+
+    <!-- Address -->
+    <div class="form-row-half">
+      <label>Street Address
+        <input type="text" name="street" placeholder="Street name and number" required>
+      </label>
+      <label>City
+        <input type="text" name="city" placeholder="Your city" required>
+      </label>
+    </div>
+    
+    <div class="form-row-half">
+      <label>Postal Code
+        <input type="text" name="postal_code" placeholder="e.g., 2191" inputmode="numeric" pattern="\d{4}" title="4-digit postal code" required>
+      </label>
+      <label>Building Type
+        <select name="building_type" required>
+          <option value="">-- Select --</option>
+          <option>House</option>
+          <option>Apartment</option>
+          <option>Office</option>
+          <option>Industrial</option>
+          <option>Other</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Quantity -->
+    <div class="form-row">
+      <label>Quantity
+        <input type="number" name="quantity" min="1" step="1" value="1" required>
+      </label>
+    </div>
+
+    <!-- Dropdowns for Material, Surface Finish, Thickness -->
+    <div class="dropdown-grid">
+      <label>Material
+        <select id="material" name="material" required>
+          <option value="">-- Select material --</option>
+          <option value="mild_steel">Mild Steel</option>
+          <option value="3cr12">3CR12 Stainless Steel</option>
+          <option value="430_ss">430 Stainless Steel</option>
+          <option value="304_ss">304 Stainless Steel</option>
+          <option value="316_ss">316 Stainless Steel</option>
+          <option value="aluminium_1050">Aluminium 1050</option>
+        </select>
+      </label>
+
+      <label>Surface Finish
+        <select id="surface_finish" name="surface_finish" required disabled>
+          <option value="">-- Select finish --</option>
+        </select>
+      </label>
+
+      <label>Thickness
+        <select id="thickness" name="thickness" required disabled>
+          <option value="">-- Select thickness --</option>
+        </select>
+      </label>
+    </div>
+
+    <label>Comments
+      <textarea name="comments" rows="4" placeholder="Enter any additional details here..."></textarea>
+    </label>
+
+    <button type="submit" class="cta-btn">Submit Request</button>
+  </form>
+</main>
+</body>
+</html>
+```
+
+---
+
+### Adjustments to Make it More Professional:
+1. **Styled Input Fields:**
+   - Improved padding, font sizing, borders, and hover effect for fields.
+   - Clearer, better-aligned labels with placeholders for a professional touch.
+
+2. **Phone Number Layout:**
+   - `+27` prefix styled and properly aligned next to the input field for better usability.
+
+3. **Quantity & Address Fields:**
+   - Balanced spacing and placed relevant fields closer together to reduce vertical whitespace.
+
+---
+
+### Please Test
+- Open the updated form and confirm if the highlighted fields now look professional.
+- Let me know if any further changes are required! Your satisfaction remains the priority.
