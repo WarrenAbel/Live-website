@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Request a Quote | Bend Cut Send</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    .dropdown-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .dropdown-grid label {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Bend Cut Send</a>
+    <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.body.classList.toggle('nav-open');">☰</button>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="metals.html">Metals Available</a>
+      <a href="qa.html">Q&amp;A</a>
+      <a href="request-quote.html" class="active">Request a Quote</a>
+      <a href="ask-question.html">Contact Us/Ask a Question</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container">
+  <h1>Request a Quote</h1>
+  <p>Please complete the form below and we will email you a quote.</p>
+
+  <form class="form-card" action="request-quote-handler.php" method="post" enctype="multipart/form-data">
+    <div class="grid-2">
+      <label>First Name
+        <input type="text" name="first_name" required>
+      </label>
+      <label>Last Name
+        <input type="text" name="last_name" required>
+      </label>
+    </div>
+
+    <label>Email
+      <input type="email" name="email" required>
+    </label>
+
+    <label>Mobile Number
+      <div class="phone-row">
+        <div class="phone-code">+27</div>
+        <input
+          class="phone-input"
+          type="tel"
+          name="phone"
+          required
+          pattern="^[0-9]{9}$"
+          inputmode="numeric"
+          placeholder="Enter 9-digit mobile number">
+      </div>
+      <small>Enter a 9-digit mobile number after +27, with no spaces or special characters.</small>
+    </label>
+
+    <div class="grid-2">
+      <label>Street Address
+        <input type="text" name="street" placeholder="Street number and name" required>
+      </label>
+      <label>City
+        <input type="text" name="city" required>
+      </label>
+    </div>
+    <div class="grid-2">
+      <label>Building Type
+        <select name="building_type" required>
+          <option value="">-- Select --</option>
+          <option>House</option>
+          <option>Apartment</option>
+          <option>Office</option>
+          <option>Industrial</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <label>Postal Code
+        <input type="text" name="postal_code" inputmode="numeric" pattern="\d{4}" title="4-digit postal code" placeholder="e.g., 2191" required>
+      </label>
+    </div>
+
+    <!-- KEEP DROPDOWNS NEXT TO EACH OTHER -->
+    <div class="dropdown-grid">
+      <label>Material
+        <select id="material" name="material" required>
+          <option value="">-- Select material --</option>
+          <option value="mild_steel">Mild Steel</option>
+          <option value="3cr12">3CR12 Stainless Steel</option>
+          <option value="430_ss">430 Stainless Steel</option>
+          <option value="304_ss">304 Stainless Steel</option>
+          <option value="316_ss">316 Stainless Steel</option>
+          <option value="aluminium_1050">Aluminium 1050</option>
+        </select>
+      </label>
+
+      <label>Surface Finish
+        <select id="surface_finish" name="surface_finish" required disabled>
+          <option value="">-- Select finish --</option>
+        </select>
+      </label>
+
+      <label>Thickness
+        <select id="thickness" name="thickness" required disabled>
+          <option value="">-- Select thickness --</option>
+        </select>
+      </label>
+    </div>
+
+    <label>Comments
+      <textarea name="comments" rows="5"></textarea>
+    </label>
+
+    <label>Design Files (max 5)
+      <input id="design_file" type="file" name="design_file[]" multiple
+             accept=".dwg,.dwt,.dxf,.dws,.dwf,.dwfx,.dxb,.pdf,.stl,.jpeg,.jpg,.png,.tiff,.bmp"
+             aria-describedby="design_file_help design_file_status">
+      <small id="design_file_help">Upload up to 5 design files (dwg, dwt, dxf, dws, dwf, dwfx, dxb, pdf, stl, jpeg, jpg, png, tiff, bmp). Maximum size 25MB per file.</small>
+      <small id="design_file_status" role="status" aria-live="polite"></small>
+    </label>
+
+    <button type="submit" class="cta-btn accent">Submit Request</button>
+  </form>
+</main>
+<footer class="site-footer">
+  <p>&copy; <span id="year"></span> Bend Cut Send.</p>
+</footer>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  (function () {
+    const materialSelect = document.getElementById('material');
+    const finishSelect = document.getElementById('surface_finish');
+    const thicknessSelect = document.getElementById('thickness');
+
+    if (!materialSelect || !finishSelect || !thicknessSelect) return;
+
+    const data = {
+      mild_steel: {
+        finishes: {
+          cold_rolled: { label: 'Cold Rolled', thicknesses: ['0.8', '1.0', '1.2'] },
+          hot_rolled: { label: 'Hot Rolled', thicknesses: ['1.6', '2.0', '2.5', '3.0', '4.0', '4.5', '5.0', '6.0', '8.0', '10.0'] },
+          galvanised: { label: 'Galvanised', thicknesses: ['0.6', '0.8', '1.0', '1.2', '1.5', '2.0', '2.5', '3.0'] },
+        },
+      },
+      '3cr12': {
+        finishes: {
+          '2d': { label: '2D', thicknesses: ['1.0', '1.5', '2.0', '2.5'] },
+          'no1': { label: 'No.1', thicknesses: ['3.0', '4.5', '6.0', '8.0', '10.0'] },
+        },
+      },
+      '430_ss': {
+        finishes: {
+          ba: { label: 'BA', thicknesses: ['0.7', '0.9', '1.2', '1.5'] },
+          '2b': { label: '2B', thicknesses: ['2.0'] },
+          pvc_ba: { label: 'PVC BA', thicknesses: ['0.7', '0.9', '1.2', '1.5'] },
+          no4: { label: 'No.4 PVC', thicknesses: ['0.7', '0.9', '1.2', '1.5', '2.0'] },
+        },
+      },
+      '304_ss': {
+        finishes: {
+          '2b': { label: '2B', thicknesses: ['0.7', '0.9', '1.2', '1.5', '2.0', '2.5', '3.0', '4.0'] },
+          no1: { label: 'No.1', thicknesses: ['4.5', '6.0', '8.0', '10.0'] },
+        },
+      },
+      '316_ss': {
+        finishes: {
+          '2b': { label: '2B', thicknesses: ['0.7', '0.9', '1.2', '1.5', '2.0', '2.5', '3.0', '4.0'] },
+          no1: { label: 'No.1', thicknesses: ['4.5', '6.0', '8.0', '10.0'] },
+        },
+      },
+      aluminium_1050: {
+        finishes: {
+          mill: { label: 'Mill', thicknesses: ['1.2', '1.5', '2.0', '3.0', '4.5', '6.0'] },
+          anodized: { label: 'Anodized', thicknesses: ['1.0', '1.2', '1.5'] },
+        },
+      },
+    };
+
+    function resetSelect(select, placeholder) {
+      select.innerHTML = '';
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = placeholder;
+      select.appendChild(opt);
+      select.value = '';
+    }
+
+    materialSelect.addEventListener('change', function () {
+      const materialKey = this.value;
+      resetSelect(finishSelect, '-- Select finish --');
+      resetSelect(thicknessSelect, '-- Select thickness --');
+      finishSelect.disabled = true;
+      thicknessSelect.disabled = true;
+
+      if (!materialKey || !data[materialKey]) return;
+
+      const finishes = data[materialKey].finishes;
+      finishSelect.disabled = false;
+
+      for (const key in finishes) {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = finishes[key].label;
+        finishSelect.appendChild(option);
+      }
+    });
+
+    finishSelect.addEventListener('change', function () {
+      const materialKey = materialSelect.value;
+      const finishKey = this.value;
+      resetSelect(thicknessSelect, '-- Select thickness --');
+      thicknessSelect.disabled = true;
+
+      if (!finishKey || !data[materialKey]?.finishes[finishKey]) return;
+
+      const thicknesses = data[materialKey].finishes[finishKey].thicknesses;
+      thicknessSelect.disabled = false;
+
+      thicknesses.forEach((t) => {
+        const option = document.createElement('option');
+        option.value = t;
+        option.textContent = t + ' mm';
+        thicknessSelect.appendChild(option);
+      });
+    });
+  })();
+</script>
+</body>
+</html>
