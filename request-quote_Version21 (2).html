@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Request a Quote | Bend Cut Send</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f9fafc;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background-color: #1a202c;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+      margin-right: auto;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+
+    .nav-links a.active {
+      background-color: #10b981;
+      border-radius: 10px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #1F2937;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .form-row label {
+      flex-basis: 48%;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #374151;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    select {
+      height: 2.6rem;
+    }
+
+    button {
+      background-color: #10b981;
+      color: white;
+      font-size: 1.2rem;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #059669;
+    }
+
+    .dropdown-grid {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+
+    .dropdown-grid label {
+      flex: 1;
+      font-size: 0.875rem;
+      font-weight: bold;
+      color: #374151;
+    }
+
+    .phone-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .phone-code {
+      background-color: #eeeeee;
+      padding: 0.5rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      align-self: center;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Bend Cut Send</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="metals.html">Metals Available</a>
+      <a href="qa.html">Q&amp;A</a>
+      <a href="request-quote.html" class="active">Request a Quote</a>
+      <a href="ask-question.html">Contact Us/Ask a Question</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container">
+  <h1>Request a Quote</h1>
+
+  <form action="/submit-quote.php" method="post" enctype="multipart/form-data">
+    <!-- First Name & Last Name -->
+    <div class="form-row">
+      <label>First Name
+        <input type="text" name="first_name" placeholder="Enter your first name" required>
+      </label>
+      <label>Last Name
+        <input type="text" name="last_name" placeholder="Enter your last name" required>
+      </label>
+    </div>
+
+    <!-- Email Address and Mobile Number -->
+    <div class="form-row">
+      <label>Email Address
+        <input type="email" name="email" placeholder="Enter your email address" required>
+      </label>
+      <label>Mobile Number
+        <div class="phone-row">
+          <div class="phone-code">+27</div>
+          <input class="phone-input" type="tel" name="phone" placeholder="Enter 9-digit mobile number" pattern="^[0-9]{9}$" required>
+        </div>
+      </label>
+    </div>
+
+    <!-- Address -->
+    <div class="form-row">
+      <label>Street Address
+        <input type="text" name="street" placeholder="Street name and number" required>
+      </label>
+      <label>City
+        <input type="text" name="city" placeholder="Your city" required>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>Postal Code
+        <input type="text" name="postal_code" placeholder="e.g., 2191" pattern="\d{4}" required>
+      </label>
+      <label>Building Type
+        <select name="building_type" required>
+          <option value="" disabled selected>-- Select building type --</option>
+          <option>House</option>
+          <option>Apartment</option>
+          <option>Office</option>
+          <option>Industrial</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Material, Surface Finish, and Thickness -->
+    <div class="dropdown-grid">
+      <label>Material
+        <select name="material" required>
+          <option value="" disabled selected>-- Select material --</option>
+          <option>Mild Steel</option>
+          <option>3CR12 Stainless Steel</option>
+          <option>430 Stainless Steel</option>
+          <option>304 Stainless Steel</option>
+          <option>316 Stainless Steel</option>
+          <option>Aluminium 1050</option>
+        </select>
+      </label>
+
+      <label>Surface Finish
+        <select name="surface_finish" required>
+          <option value="" disabled selected>-- Select surface finish --</option>
+        </select>
+      </label>
+      <label>Thickness
+        <select name="thickness" required>
+          <option value="" disabled selected>-- Select thickness --</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>Quantity
+        <input type="number" name="quantity" min="1" step="1" value="1" required>
+      </label>
+    </div>
+
+    <label for="design_file">Upload Design Files (Max 5)
+      <input type="file" name="design_file[]" id="design_file" multiple accept=".dwg,.dwt,.dxf,.dws,.dwf,.dwfx,.dxb,.pdf,.stl,.jpeg,.jpg,.png,.tiff,.bmp">
+    </label>
+
+    <label>Comments
+      <textarea name="comments" rows="4"></textarea>
+    </label>
+
+    <button type="submit">Submit Request</button>
+  </form>
+</main>
+</body>
+</html>
