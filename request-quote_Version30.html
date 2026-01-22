@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Request a Quote | Bend Cut Send</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f9fafc;
+      margin: 0;
+    }
+
+    .navbar {
+      display: flex;
+      background-color: #1a202c;
+      padding: 1rem 2rem;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .nav-logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: white;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: white;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .nav-links a.active {
+      background-color: #10b981;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #374151;
+    }
+
+    .form-row, .dropdown-grid {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      font-size: 1rem;
+      color: #374151;
+    }
+
+    input, select, textarea, button {
+      font-size: 1rem;
+      padding: 0.8rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      width: 100%;
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    #surface_finish, #thickness {
+      background-color: #f9fafc;
+    }
+
+    button {
+      background-color: #10b981;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0.8rem;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #059669;
+    }
+  </style>
+  <script>
+    // Dropdown data (Mimicking dependency)
+    const materialData = {
+      "Mild Steel": {
+        "Cold Rolled": ["0.8", "1.0", "1.2"],
+        "Hot Rolled": ["1.6", "2.0", "2.5", "3.0", "4.0", "4.5", "5.0", "6.0", "8.0", "10.0"],
+        "Galvanised": ["0.6", "0.8", "1.0", "1.2", "1.5", "2.0", "2.5", "3.0"]
+      },
+      "3CR12 Stainless Steel": {
+        "2D": ["1.0", "1.5", "2.0", "2.5"],
+        "No.1": ["3.0", "4.5", "6.0", "8.0", "10.0"]
+      },
+      "430 Stainless Steel": {
+        "BA / PVC BA": ["0.7", "0.9", "1.2", "1.5"],
+        "2B / 2B PVC": ["2.0"],
+        "No.4 PVC": ["0.7", "0.9", "1.2", "1.5", "2.0"]
+      },
+      "304 Stainless Steel": {
+        "2B / 2B PVC": ["0.7", "0.9", "1.2", "1.5", "2.0", "2.5", "3.0", "4.0"],
+        "No.1": ["4.5", "6.0", "8.0", "10.0"],
+        "No.4 PVC": ["0.7", "0.9", "1.2", "1.5", "2.0", "2.5", "3.0", "4.0"]
+      },
+      "316 Stainless Steel": {
+        "2B / 2B PVC": ["0.7", "0.9", "1.2", "1.5", "2.0", "2.5", "3.0", "4.0"],
+        "No.1": ["4.5", "6.0", "8.0", "10.0"],
+        "No.4 PVC": ["0.7", "0.9", "1.2", "1.5", "2.0", "2.5", "3.0", "4.0"]
+      },
+      "Aluminium 1050": {
+        "Mill": ["1.2", "1.5", "2.0", "3.0", "4.5", "6.0"],
+        "Mill PVC": ["1.2", "1.5", "2.0", "3.0"]
+      }
+    };
+
+    // Update surface finish options based on material selection
+    function updateSurfaceFinishes() {
+      const material = document.getElementById("material").value;
+      const surfaceFinish = document.getElementById("surface_finish");
+      const thickness = document.getElementById("thickness");
+
+      surfaceFinish.innerHTML = `<option value="" disabled selected>-- Select surface finish --</option>`;
+      thickness.innerHTML = `<option value="" disabled selected>-- Select thickness --</option>`;
+      thickness.disabled = true;
+
+      if (materialData[material]) {
+        Object.keys(materialData[material]).forEach(finish => {
+          const newOption = document.createElement("option");
+          newOption.value = finish;
+          newOption.textContent = finish;
+          surfaceFinish.appendChild(newOption);
+        });
+        surfaceFinish.disabled = false;
+      }
+    }
+
+    // Update thickness options based on surface finish selection
+    function updateThicknesses() {
+      const material = document.getElementById("material").value;
+      const surfaceFinish = document.getElementById("surface_finish").value;
+      const thickness = document.getElementById("thickness");
+
+      thickness.innerHTML = `<option value="" disabled selected>-- Select thickness --</option>`;
+
+      if (materialData[material] && materialData[material][surfaceFinish]) {
+        materialData[material][surfaceFinish].forEach(thicknessOption => {
+          const newOption = document.createElement("option");
+          newOption.value = thicknessOption;
+          newOption.textContent = thicknessOption + " mm";
+          thickness.appendChild(newOption);
+        });
+        thickness.disabled = false;
+      }
+    }
+  </script>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-logo">Bend Cut Send</div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="metals.html">Metals Available</a>
+    <a href="qa.html">Q&A</a>
+    <a href="request-quote.html" class="active">Request a Quote</a>
+    <a href="ask-question.html">Contact Us/Ask a Question</a>
+  </div>
+</nav>
+
+<main class="container">
+  <h1>Request a Quote</h1>
+
+  <form id="quoteForm" action="your-server-endpoint" method="post">
+    <div class="dropdown-grid">
+      <label>Material:
+        <select id="material" onchange="updateSurfaceFinishes()"></label>
+        <option>MILD
