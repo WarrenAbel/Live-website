@@ -1,11 +1,15 @@
 <?php
 // payfast-ipn.php
 // Handles PayFast ITN (Instant Transaction Notification)
-// - Verifies security
-// - Updates quote status to paid / cancelled / failed
-// - Sends emails to admin and client
 
 require __DIR__ . '/config.php';
+
+// ===== ITN DEBUG LOGGING (remove when confirmed working) =====
+$logFile = __DIR__ . '/payfast-itn.log';
+function itn_log($message) {
+    global $logFile;
+    @file_put_contents($logFile, '[' . date('c') . '] ' . $message . PHP_EOL, FILE_APPEND);
+}
 
 // Helper to send an email (simple wrapper)
 function sendMailSimple($to, $subject, $body, $from = 'noreply@bendcutsend.net', $bcc = '') {
@@ -25,160 +29,187 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit('Method Not Allowed');
 }
 
-// Store POST in a local variable
 $data = $_POST;
 
-// Basic required fields
-$pfPaymentId   = $data['pf_payment_id']   ?? '';
-$mPaymentId    = $data['m_payment_id']    ?? ''; // your quote_number
-$paymentStatus = $data['payment_status']  ?? '';
-$amountGross   = $data['amount_gross']    ?? '';
-$emailAddress  = $data['email_address']   ?? '';
+// Log every hit (do NOT log full card/customer data; PayFast ITN doesn't include card numbers)
+itn_log('ITN HIT: ' . json_encode($data));
 
-// ----------------------------------------------------------------------
-// 1. Validate signature
-// ----------------------------------------------------------------------
-$signature = $data['signature'] ?? '';
-unset($data['signature']);
+try {
+    // Required fields
+    $pfPaymentId   = $data['pf_payment_id']   ?? '';
+    $mPaymentId    = $data['m_payment_id']    ?? ''; // your quote_number
+    $paymentStatus = $data['payment_status']  ?? ''; // COMPLETE / CANCELLED / FAILED / PENDING
+    $amountGross   = $data['amount_gross']    ?? '';
 
-ksort($data);
-$pfParamString = '';
-foreach ($data as $key => $val) {
-    if ($val !== '') {
-        $pfParamString .= $key . '=' . urlencode(trim($val)) . '&';
+    // ----------------------------------------------------------------------
+    // 1) Validate signature
+    // ----------------------------------------------------------------------
+    $signature = $data['signature'] ?? '';
+    unset($data['signature']);
+
+    ksort($data);
+    $pfParamString = '';
+    foreach ($data as $key => $val) {
+        if ($val !== '') {
+            $pfParamString .= $key . '=' . urlencode(trim($val)) . '&';
+        }
     }
-}
-$pfParamString = rtrim($pfParamString, '&');
+    $pfParamString = rtrim($pfParamString, '&');
 
-// Add passphrase if set
-if ($payfastPassphrase !== '') {
-    $pfParamString .= '&passphrase=' . urlencode($payfastPassphrase);
-}
+    if ($payfastPassphrase !== '') {
+        $pfParamString .= '&passphrase=' . urlencode($payfastPassphrase);
+    }
 
-$calculatedSignature = md5($pfParamString);
+    $calculatedSignature = md5($pfParamString);
 
-if (strcasecmp($signature, $calculatedSignature) !== 0) {
-    http_response_code(400);
-    exit('Invalid signature');
-}
+    if (strcasecmp($signature, $calculatedSignature) !== 0) {
+        itn_log("SIGNATURE FAIL for m_payment_id={$mPaymentId} sig_recv={$signature} sig_calc={$calculatedSignature}");
+        http_response_code(400);
+        exit('Invalid signature');
+    }
 
-// ----------------------------------------------------------------------
-// 2. Lookup quote by quote_number (m_payment_id)
-// ----------------------------------------------------------------------
-$stmt = $pdo->prepare("SELECT * FROM quotes WHERE quote_number = :quote_number LIMIT 1");
-$stmt->execute([':quote_number' => $mPaymentId]);
-$quote = $stmt->fetch(PDO::FETCH_ASSOC);
+    itn_log("SIGNATURE OK for m_payment_id={$mPaymentId}");
 
-if (!$quote) {
-    http_response_code(404);
-    exit('Quote not found for m_payment_id');
-}
+    // ----------------------------------------------------------------------
+    // 2) Lookup quote by quote_number (m_payment_id)
+    // ----------------------------------------------------------------------
+    $stmt = $pdo->prepare("SELECT * FROM quotes WHERE quote_number = :quote_number LIMIT 1");
+    $stmt->execute([':quote_number' => $mPaymentId]);
+    $quote = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$quoteId    = (int)$quote['id'];
-$adminEmail = 'admin@bendcutsend.net';
-$clientEmail = $quote['client_email'];
-$clientName  = $quote['client_name'];
+    if (!$quote) {
+        itn_log("QUOTE NOT FOUND for m_payment_id={$mPaymentId}");
+        http_response_code(404);
+        exit('Quote not found for m_payment_id');
+    }
 
-// ----------------------------------------------------------------------
-// 3. Update status based on payment_status
-// ----------------------------------------------------------------------
-$statusToSet = $quote['status']; // default: keep existing
-$emailSubject = '';
-$emailBodyAdmin = '';
-$emailBodyClient = '';
+    $quoteId     = (int)$quote['id'];
+    $adminEmail  = 'admin@bendcutsend.net';
+    $clientEmail = $quote['client_email'];
+    $clientName  = $quote['client_name'];
 
-if ($paymentStatus === 'COMPLETE') {
-    $statusToSet = 'paid';
+    // ----------------------------------------------------------------------
+    // 3) Map PayFast payment_status -> internal status
+    // ----------------------------------------------------------------------
+    $statusToSet = $quote['status']; // default: keep existing
+    $emailSubject = '';
+    $emailBodyAdmin = '';
+    $emailBodyClient = '';
 
-    $emailSubject = "Payment successful for quote {$quote['quote_number']}";
-    $emailBodyAdmin =
-        "A payment has been completed via PayFast.\n\n" .
-        "Quote: {$quote['quote_number']}\n" .
-        "Client: {$clientName}\n" .
-        "Client email: {$clientEmail}\n" .
-        "Amount paid: R {$amountGross}\n" .
-        "PayFast reference: {$pfPaymentId}\n" .
-        "Status: COMPLETE\n";
+    if ($paymentStatus === 'COMPLETE') {
+        $statusToSet = 'paid';
 
-    $emailBodyClient =
-        "Hi {$clientName},\n\n" .
-        "Thank you for your payment.\n\n" .
-        "Quote: {$quote['quote_number']}\n" .
-        "Amount paid: R {$amountGross}\n" .
-        "PayFast reference: {$pfPaymentId}\n\n" .
-        "Your payment has been received successfully.\n\n" .
-        "Kind regards,\nBend Cut Send\nhttps://bendcutsend.net\n";
+        $emailSubject = "Payment successful for quote {$quote['quote_number']}";
+        $emailBodyAdmin =
+            "A payment has been completed via PayFast.\n\n" .
+            "Quote: {$quote['quote_number']}\n" .
+            "Client: {$clientName}\n" .
+            "Client email: {$clientEmail}\n" .
+            "Amount paid: R {$amountGross}\n" .
+            "PayFast reference: {$pfPaymentId}\n" .
+            "Status: COMPLETE\n";
 
-} elseif ($paymentStatus === 'CANCELLED') {
-    $statusToSet = 'cancelled';
+        $emailBodyClient =
+            "Hi {$clientName},\n\n" .
+            "Thank you for your payment.\n\n" .
+            "Quote: {$quote['quote_number']}\n" .
+            "Amount paid: R {$amountGross}\n" .
+            "PayFast reference: {$pfPaymentId}\n\n" .
+            "Your payment has been received successfully.\n\n" .
+            "Kind regards,\nBend Cut Send\nhttps://bendcutsend.net\n";
 
-    $emailSubject = "Payment cancelled for quote {$quote['quote_number']}";
-    $emailBodyAdmin =
-        "A PayFast payment was cancelled.\n\n" .
-        "Quote: {$quote['quote_number']}\n" .
-        "Client: {$clientName}\n" .
-        "Client email: {$clientEmail}\n" .
-        "Amount: R {$amountGross}\n" .
-        "PayFast reference: {$pfPaymentId}\n" .
-        "Status: CANCELLED\n";
+    } elseif ($paymentStatus === 'CANCELLED') {
+        $statusToSet = 'cancelled';
 
-    $emailBodyClient =
-        "Hi {$clientName},\n\n" .
-        "Your PayFast payment for quote {$quote['quote_number']} was cancelled.\n\n" .
-        "No funds have been taken. If you cancelled by mistake, you can use the payment link we sent you to try again.\n\n" .
-        "Kind regards,\nBend Cut Send\nhttps://bendcutsend.net\n";
+        $emailSubject = "Payment cancelled for quote {$quote['quote_number']}";
+        $emailBodyAdmin =
+            "A PayFast payment was cancelled.\n\n" .
+            "Quote: {$quote['quote_number']}\n" .
+            "Client: {$clientName}\n" .
+            "Client email: {$clientEmail}\n" .
+            "Amount: R {$amountGross}\n" .
+            "PayFast reference: {$pfPaymentId}\n" .
+            "Status: CANCELLED\n";
 
-} elseif ($paymentStatus === 'FAILED') {
-    $statusToSet = 'failed';
+        $emailBodyClient =
+            "Hi {$clientName},\n\n" .
+            "Your PayFast payment for quote {$quote['quote_number']} was cancelled.\n\n" .
+            "No funds have been taken. If you cancelled by mistake, you can use the payment link we sent you to try again.\n\n" .
+            "Kind regards,\nBend Cut Send\nhttps://bendcutsend.net\n";
 
-    $emailSubject = "Payment failed for quote {$quote['quote_number']}";
-    $emailBodyAdmin =
-        "A PayFast payment failed.\n\n" .
-        "Quote: {$quote['quote_number']}\n" .
-        "Client: {$clientName}\n" .
-        "Client email: {$clientEmail}\n" .
-        "Amount: R {$amountGross}\n" .
-        "PayFast reference: {$pfPaymentId}\n" .
-        "Status: FAILED\n";
+    } elseif ($paymentStatus === 'FAILED') {
+        $statusToSet = 'failed';
 
-    $emailBodyClient =
-        "Hi {$clientName},\n\n" .
-        "Unfortunately, your PayFast payment for quote {$quote['quote_number']} failed.\n\n" .
-        "No funds have been taken. Please try again later or contact us if the problem continues.\n\n" .
-        "Kind regards,\nBend Cut Send\nhttps://bendcutsend.net\n";
-}
+        $emailSubject = "Payment failed for quote {$quote['quote_number']}";
+        $emailBodyAdmin =
+            "A PayFast payment failed.\n\n" .
+            "Quote: {$quote['quote_number']}\n" .
+            "Client: {$clientName}\n" .
+            "Client email: {$clientEmail}\n" .
+            "Amount: R {$amountGross}\n" .
+            "PayFast reference: {$pfPaymentId}\n" .
+            "Status: FAILED\n";
 
-// Update status if changed
-if ($statusToSet !== $quote['status']) {
-    $stmt = $pdo->prepare("UPDATE quotes SET status = :status WHERE id = :id");
+        $emailBodyClient =
+            "Hi {$clientName},\n\n" .
+            "Unfortunately, your PayFast payment for quote {$quote['quote_number']} failed.\n\n" .
+            "No funds have been taken. Please try again later or contact us if the problem continues.\n\n" .
+            "Kind regards,\nBend Cut Send\nhttps://bendcutsend.net\n";
+    }
+
+    // ----------------------------------------------------------------------
+    // 4) Update quote with BOTH internal and raw PayFast status fields
+    // ----------------------------------------------------------------------
+    $stmt = $pdo->prepare("
+      UPDATE quotes
+      SET
+        status = :status,
+        payfast_payment_status = :payfast_payment_status,
+        payfast_pf_payment_id = :payfast_pf_payment_id,
+        payfast_amount_gross = :payfast_amount_gross,
+        payfast_updated_at = NOW()
+      WHERE id = :id
+    ");
     $stmt->execute([
         ':status' => $statusToSet,
-        ':id'     => $quoteId,
+        ':payfast_payment_status' => ($paymentStatus !== '' ? $paymentStatus : null),
+        ':payfast_pf_payment_id' => ($pfPaymentId !== '' ? $pfPaymentId : null),
+        ':payfast_amount_gross' => ($amountGross !== '' ? $amountGross : null),
+        ':id' => $quoteId,
     ]);
-}
 
-// ----------------------------------------------------------------------
-// 4. Send emails (admin + client) for all handled statuses
-// ----------------------------------------------------------------------
-if ($emailSubject !== '') {
-    // Admin gets a copy, plus BCC to sent@ for record
-    sendMailSimple(
-        $adminEmail,
-        $emailSubject,
-        $emailBodyAdmin,
-        'noreply@bendcutsend.net',
-        'sent@bendcutsend.net'
-    );
+    itn_log("DB UPDATED quote_number={$quote['quote_number']} id={$quoteId} status={$statusToSet} pf_status={$paymentStatus} pf_payment_id={$pfPaymentId} amount_gross={$amountGross}");
 
-    if (!empty($clientEmail)) {
+    // ----------------------------------------------------------------------
+    // 5) Send emails (admin + client) for handled statuses
+    // ----------------------------------------------------------------------
+    if ($emailSubject !== '') {
         sendMailSimple(
-            $clientEmail,
+            $adminEmail,
             $emailSubject,
-            $emailBodyClient,
-            'noreply@bendcutsend.net'
+            $emailBodyAdmin,
+            'noreply@bendcutsend.net',
+            'sent@bendcutsend.net'
         );
-    }
-}
 
-// Always respond something so PayFast knows ITN was processed
-echo 'OK';
+        if (!empty($clientEmail)) {
+            sendMailSimple(
+                $clientEmail,
+                $emailSubject,
+                $emailBodyClient,
+                'noreply@bendcutsend.net'
+            );
+        }
+
+        itn_log("EMAIL SENT quote_number={$quote['quote_number']} subject=" . $emailSubject);
+    } else {
+        itn_log("NO EMAIL (payment_status={$paymentStatus})");
+    }
+
+    echo 'OK';
+
+} catch (Throwable $e) {
+    itn_log("ERROR: " . $e->getMessage());
+    http_response_code(500);
+    echo 'ITN error';
+}
