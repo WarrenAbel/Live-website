@@ -1,77 +1,73 @@
 <?php
 require __DIR__ . '/config.php';
 
-// Get quote id from URL
-$quoteId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($quoteId <= 0) {
-    http_response_code(400);
-    echo 'Missing or invalid quote ID.';
-    exit;
-}
+$base = 'https://bendcutsend.net'; // IMPORTANT: keep consistent everywhere
 
-// Load quote from DB
+$quoteId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($quoteId <= 0) { http_response_code(400); exit('Missing or invalid quote ID.'); }
+
 $stmt = $pdo->prepare("SELECT * FROM quotes WHERE id = :id");
 $stmt->execute([':id' => $quoteId]);
 $quote = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$quote) { http_response_code(404); exit('Quote not found.'); }
 
-if (!$quote) {
-    http_response_code(404);
-    echo 'Quote not found.';
-    exit;
+$amount        = (float)($quote['amount'] ?? 0);
+$customerName  = (string)($quote['client_name'] ?? '');
+$customerEmail = (string)($quote['client_email'] ?? '');
+$quoteNumber   = (string)($quote['quote_number'] ?? '');
+
+if ($amount <= 0) exit('Quote amount not set yet.');
+
+// Mark as pending before redirect (optional but helpful)
+try {
+    $pdo->prepare("UPDATE quotes SET status = 'pending' WHERE id = :id")->execute([':id' => $quoteId]);
+} catch (Throwable $e) {
+    // ignore if your schema doesn't allow it; not fatal
 }
 
-$amount        = (float)$quote['amount'];
-$customerName  = $quote['client_name'];
-$customerEmail = $quote['client_email'];
-$quoteNumber   = $quote['quote_number'];
-
-if ($amount <= 0) {
-    die('Quote amount not set yet.');
-}
-
-// Build PayFast data
+// Build PayFast request
 $data = [
     'merchant_id'   => $payfastMerchantId,
     'merchant_key'  => $payfastMerchantKey,
 
-    // After successful/cancelled payment: send back to payment-result page
-    'return_url'    => 'https://bendcutsend.net/payment-result.php?m_payment_id=' . urlencode($quoteNumber),
-    'cancel_url'    => 'https://bendcutsend.net/payment-result.php?m_payment_id=' . urlencode($quoteNumber),
-
-    // ITN / IPN notification to your server
-    'notify_url'    => 'https://bendcutsend.net/payfast-ipn.php',
+    'return_url'    => $base . '/payment-result.php?m_payment_id=' . urlencode($quoteNumber),
+    'cancel_url'    => $base . '/payment-result.php?m_payment_id=' . urlencode($quoteNumber),
+    'notify_url'    => $base . '/payfast-ipn.php',
 
     'name_first'    => $customerName,
     'email_address' => $customerEmail,
 
-    'm_payment_id'  => $quoteNumber,                     // your quote ref
+    'm_payment_id'  => $quoteNumber,
     'amount'        => number_format($amount, 2, '.', ''),
     'item_name'     => 'Quote ' . $quoteNumber,
 ];
 
-// Signature function
-function generateSignature($data, $passphrase) {
-    $tmp = [];
-    foreach ($data as $key => $value) {
-        if ($value !== '') {
-            $tmp[] = $key . '=' . urlencode(trim($value));
-        }
-    }
-    $string = implode('&', $tmp);
+// Remove empty + sort
+unset($data['signature']);
+foreach ($data as $k => $v) if ((string)$v === '') unset($data[$k]);
+ksort($data);
 
-    if ($passphrase !== '') {
-        $string .= '&passphrase=' . urlencode($passphrase);
-    }
-
-    return md5($string);
+// Build param string with urlencode (PayFast compatible)
+$pairs = [];
+foreach ($data as $k => $v) {
+    $pairs[] = $k . '=' . urlencode((string)$v);
 }
+$paramString = implode('&', $pairs);
 
-$data['signature'] = generateSignature($data, $payfastPassphrase);
+// Sign (include passphrase only if it is set in BOTH PayFast dashboard and config.php)
+$toSign = $paramString;
+if (!empty($payfastPassphrase)) {
+    $toSign .= '&passphrase=' . urlencode($payfastPassphrase);
+}
+$signature = md5($toSign);
 
-// Build redirect URL
-$query = http_build_query($data);
-$redirectUrl = $payfastBaseUrl . '?' . $query;
+$redirectUrl = rtrim($payfastBaseUrl, '?') . '?' . $paramString . '&signature=' . $signature;
 
-// Redirect to PayFast
+// Debug log: proves what URL is being sent (so we can confirm notify_url)
+@file_put_contents(__DIR__ . '/payfast-link-debug.log',
+    '[' . date('c') . "] quote={$quoteNumber}\nURL={$redirectUrl}\nTO_SIGN={$toSign}\nSIG={$signature}\n\n",
+    FILE_APPEND
+);
+
 header('Location: ' . $redirectUrl);
 exit;
